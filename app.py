@@ -58,6 +58,3 @@ def encrypt_pdf():
         return str(e), 500
     finally:
         if os.path.exists(input_path): os.remove(input_path)
-
-if __name__ == '__main__':
-    app.run(port=5000, debug=True)
