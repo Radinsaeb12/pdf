@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = 'temp'
+UPLOAD_FOLDER = '/tmp/temp'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Ana sayfaya (/) girildiğinde doğrudan yanındaki index.html'i okuyup tarayıcıya basar
