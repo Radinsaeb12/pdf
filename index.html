@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title x-text="settings.appName + ' — Profesyonel Medya Stüdyosu'"></title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <!-- Kütüphaneler -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+</head>
+<body x-data="novaApp()" x-init="initApp(); initAnimations()" :style="`--bg-main: ${settings.bgMain}; --bg-card: ${settings.bgCard}; --border-card: ${settings.borderCard}; --accent-from: ${settings.accentFrom}; --accent-to: ${settings.accentTo}; background-color: var(--bg-main); color: #f8fafc; min-height: 100vh;`">
+
+  <!-- ÜST NAVBAR -->
+  <header class="sticky top-0 z-50 px-8 h-20 flex items-center justify-between border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
+    <div class="flex items-center gap-3 cursor-pointer group" @click="activeTab = 'home'; scrollToTop()">
+      <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-xl" 
+           :style="`background: linear-gradient(135deg, ${settings.accentFrom}, ${settings.accentTo});`"
+           x-html="settings.logoSvg"></div>
+      <div>
+        <h1 class="font-black text-lg tracking-tight text-white" x-text="settings.appName">NovaStudio</h1>
+        <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase" x-text="settings.appSubtitle">Medya Konsolu</p>
+      </div>
+    </div>
+
+    <!-- Üst Menü Sekmeleri -->
+    <nav class="hidden md:flex items-center gap-1.5 bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800">
+      <button @click="activeTab = 'home'; scrollToTop()" :class="activeTab === 'home' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">Ana Sayfa</button>
+      <button @click="activeTab = 'pdf'" :class="activeTab === 'pdf' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">📄 Belgeler</button>
+      <button @click="activeTab = 'image'" :class="activeTab === 'image' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">🖼️ Resimler</button>
+      <button @click="activeTab = 'media'" :class="activeTab === 'media' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">🎬 Videolar</button>
+      <button @click="activeTab = 'tools'" :class="activeTab === 'tools' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">📦 Arşiv Araçları</button>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <button @click="settingsOpen = true" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs transition-all shadow-md">
+        🎨 Özelleştir
+      </button>
+    </div>
+  </header>
+
+  <!-- ANA İÇERİK -->
+  <main class="flex-1 w-full pb-32 overflow-hidden">
+
+    <!-- 1. ANA SAYFA -->
+    <div x-show="activeTab === 'home'" class="space-y-24 animate-fade-in">
+      <section id="hero" class="pt-20 px-6 max-w-7xl mx-auto text-center space-y-8">
+        <div class="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 shadow-inner opacity-0">
+          ✨ Tamamen Kararlı, Hibrit ve Güçlü Medya Stüdyosu
+        </div>
+
+        <h1 class="hero-title text-4xl md:text-7xl font-black tracking-tight leading-none text-white max-w-4xl mx-auto opacity-0">
+          Tüm Dosya ve Medya İşlemleriniz İçin <br>
+          <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent" x-text="settings.appName"></span>
+        </h1>
+
+        <p class="hero-desc text-slate-400 text-base md:text-xl max-w-2xl mx-auto leading-relaxed opacity-0">
+          PDF şifrelemeden resim sıkıştırmaya, fotoğraftan müzikli klip üretmeye kadar aradığın her şey tek konsolda.
+        </p>
+
+        <div class="hero-buttons flex flex-wrap justify-center gap-4 pt-2 opacity-0">
+          <button @click="activeTab = 'media'" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl transition-all transform hover:scale-105">
+            🎬 Video Araçlarını Keşfet
+          </button>
+          <button @click="activeTab = 'pdf'" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-6 py-3.5 rounded-2xl text-xs transition-all shadow-xl transform hover:scale-105">
+            📄 Belge Araçlarına Git
+          </button>
+        </div>
+      </section>
+
+      <section class="feature-cards max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6 opacity-0">
+        <div @click="activeTab = 'pdf'" class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 cursor-pointer group hover:border-indigo-500/50 transition-all transform hover:-translate-y-1">
+          <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">📄</div>
+          <h3 class="font-bold text-white text-base mb-1">Belge Yönetimi</h3>
+          <p class="text-xs text-slate-400">PDF birleştirme, sayfa silme ve güvenli sunucu tabanlı şifreleme.</p>
+        </div>
+
+        <div @click="activeTab = 'image'" class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 cursor-pointer group hover:border-indigo-500/50 transition-all transform hover:-translate-y-1">
+          <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🖼️</div>
+          <h3 class="font-bold text-white text-base mb-1">Resim İşlemleri</h3>
+          <p class="text-xs text-slate-400">Görsel boyutlandırma, sıkıştırma ve format dönüştürme (WEBP, PNG, JPG).</p>
+        </div>
+
+        <div @click="activeTab = 'media'" class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 cursor-pointer group hover:border-indigo-500/50 transition-all transform hover:-translate-y-1">
+          <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🎬</div>
+          <h3 class="font-bold text-white text-base mb-1">Video & Ses</h3>
+          <p class="text-xs text-slate-400">Videodan MP3 çıkarma, fotoğraf + müzikten klip üretme ve ses değiştirme.</p>
+        </div>
+
+        <div @click="activeTab = 'tools'" class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 cursor-pointer group hover:border-indigo-500/50 transition-all transform hover:-translate-y-1">
+          <div class="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">📦</div>
+          <h3 class="font-bold text-white text-base mb-1">Arşiv Araçları</h3>
+          <p class="text-xs text-slate-400">Çoklu dosyalarınızı tek tıkla ZIP arşivine dönüştürün.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- 2. BELGELER SEKMESİ -->
+    <div x-show="activeTab === 'pdf'" x-cloak class="max-w-7xl mx-auto px-6 pt-12 space-y-8 animate-fade-in">
+      <div class="p-8 rounded-3xl bg-slate-900/90 border border-slate-800">
+        <span class="text-xs font-bold text-rose-400 uppercase tracking-wider">Belge Yönetimi</span>
+        <h2 class="text-2xl md:text-4xl font-black text-white mt-1">Belgeler Konsolu</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div @click="openWorkspace('PDF Birleştirici', '.pdf', 'merger')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🔗</div>
+          <h4 class="font-bold text-white text-base mb-1">PDF Birleştirici</h4>
+          <p class="text-xs text-slate-400">Birden fazla PDF'i tek dosyada birleştirin.</p>
+        </div>
+        <div @click="openWorkspace('PDF Sayfa Sil / Çıkar', '.pdf', 'pdf-remover')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">✂️</div>
+          <h4 class="font-bold text-white text-base mb-1">PDF Sayfa Sil / Çıkar</h4>
+          <p class="text-xs text-slate-400">İstediğiniz sayfaları ayıklayın.</p>
+        </div>
+        <div @click="openWorkspace('PDF Şifreleme', '.pdf', 'pdf-encrypt')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🔒</div>
+          <h4 class="font-bold text-white text-base mb-1">PDF Şifreleme</h4>
+          <p class="text-xs text-slate-400">PDF dosyanıza şifre koruması ekleyin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. RESİMLER SEKMESİ -->
+    <div x-show="activeTab === 'image'" x-cloak class="max-w-7xl mx-auto px-6 pt-12 space-y-8 animate-fade-in">
+      <div class="p-8 rounded-3xl bg-slate-900/90 border border-slate-800">
+        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Görsel Optimizasyonu</span>
+        <h2 class="text-2xl md:text-4xl font-black text-white mt-1">Resimler Konsolu</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div @click="openWorkspace('Resim Sıkıştırıcı', '.png, .jpg, .jpeg, .webp', 'compressor')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">⚡</div>
+          <h4 class="font-bold text-base text-white mb-1">Resim Sıkıştırıcı</h4>
+          <p class="text-xs text-slate-400">Görsel boyutlarını küçültün.</p>
+        </div>
+        <div @click="openWorkspace('Format Dönüştürücü', '.png, .jpg, .jpeg, .webp', 'converter')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🔄</div>
+          <h4 class="font-bold text-base text-white mb-1">Format Dönüştürücü</h4>
+          <p class="text-xs text-slate-400">WEBP, PNG veya JPG formatına çevirin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. VİDEOLAR SEKMESİ -->
+    <div x-show="activeTab === 'media'" x-cloak class="max-w-7xl mx-auto px-6 pt-12 space-y-8 animate-fade-in">
+      <div class="p-8 rounded-3xl bg-slate-900/90 border border-slate-800">
+        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Ses & Video</span>
+        <h2 class="text-2xl md:text-4xl font-black text-white mt-1">Videolar Konsolu</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div @click="openWorkspace('MP4 -> MP3 Ses Ayıklayıcı', '.mp4, .mkv, .avi', 'audio-extract')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🎵</div>
+          <h4 class="font-bold text-base text-white mb-1">Videodan MP3 Ses Çıkar</h4>
+          <p class="text-xs text-slate-400">Videodaki sesi saf MP3 olarak dışarı aktarın.</p>
+        </div>
+        <div @click="openWorkspace('Görsel + MP3 -> WebM Yapıcı', '.png, .jpg, .jpeg, .mp3', 'image-audio-video')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🖼️</div>
+          <h4 class="font-bold text-base text-white mb-1">Fotoğraf + MP3 = Klip Yap</h4>
+          <p class="text-xs text-slate-400">Sabit fotoğraf ve müzikten WebM klip üretin.</p>
+        </div>
+        <div @click="openWorkspace('Video Sesini Değiştir (Video + MP3)', '.mp4, .mp3', 'video-audio-replace')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">🎬</div>
+          <h4 class="font-bold text-base text-white mb-1">Videoya Yeni MP3 Sesi Ekle</h4>
+          <p class="text-xs text-slate-400">Videonun sesini söküp yeni müzik ekleyin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. ARAÇLAR SEKMESİ -->
+    <div x-show="activeTab === 'tools'" x-cloak class="max-w-7xl mx-auto px-6 pt-12 space-y-8 animate-fade-in">
+      <div class="p-8 rounded-3xl bg-slate-900/90 border border-slate-800">
+        <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Akıllı Araçlar</span>
+        <h2 class="text-2xl md:text-4xl font-black text-white mt-1">Arşiv Konsolu</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-md">
+        <div @click="openWorkspace('ZIP Paketleyici', '*/*', 'zip-tool')" class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 cursor-pointer group">
+          <div class="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">📦</div>
+          <h4 class="font-bold text-base text-white mb-1">Dosyaları ZIP Yap</h4>
+          <p class="text-xs text-slate-400">Dosyalarınızı kolayca arşivleyin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSPACE ÇALIŞMA ALANI -->
+    <div x-show="activeTab === 'workspace'" x-cloak class="max-w-5xl mx-auto px-6 pt-10 space-y-8 animate-fade-in">
+      <div class="p-8 rounded-3xl space-y-8 bg-slate-900/95 border border-slate-800 shadow-2xl">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider">Çalışma Stüdyosu</span>
+            <h2 class="text-2xl font-black text-white mt-1" x-text="currentToolName"></h2>
+          </div>
+          <button @click="activeTab = 'home'" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all">← Geri Dön</button>
+        </div>
+
+        <!-- Yükleme Dropzone -->
+        <template x-if="fileList.length === 0">
+          <div class="border-2 border-dashed border-slate-700 bg-slate-950 rounded-2xl p-12 text-center relative cursor-pointer hover:border-indigo-500 transition-all">
+            <input type="file" :accept="currentAccept" :multiple="toolType === 'merger' || toolType === 'zip-tool' || toolType === 'image-audio-video' || toolType === 'video-audio-replace'" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" @change="handleFiles">
+            <div class="space-y-3">
+              <div class="text-4xl">📂</div>
+              <p class="text-sm font-bold text-white">Dosyanızı buraya sürükleyin veya seçmek için tıklayın</p>
+              <p class="text-xs text-slate-500" x-text="'İzin verilen formatlar: ' + currentAccept"></p>
+            </div>
+          </div>
+        </template>
+
+        <!-- 1. PDF BİRLEŞTİRİCİ -->
+        <template x-if="toolType === 'merger' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-white text-sm" x-text="'Birleştirilecek PDF Dosyaları (' + fileList.length + ' Adet)'"></h4>
+              <button @click="fileList = []" class="text-xs text-rose-400 font-bold underline">Listeyi Temizle</button>
+            </div>
+            <div class="space-y-2 max-h-72 overflow-y-auto pr-2">
+              <template x-for="(file, index) in fileList" :key="index">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center justify-center" x-text="index + 1"></span>
+                    <span class="text-xs font-bold text-white" x-text="file.name"></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button @click="moveFile(index, -1)" class="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs">▲</button>
+                    <button @click="moveFile(index, 1)" class="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs">▼</button>
+                    <button @click="removeFile(index)" class="px-2 py-1 bg-rose-500/20 text-rose-400 rounded text-xs">✕</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <!-- 2. PDF SAYFA SİLME -->
+        <template x-if="toolType === 'pdf-remover' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+              <span class="text-xs font-bold text-white" x-text="fileList[0].name"></span>
+              <button @click="fileList = []" class="text-xs text-rose-400 font-bold underline">Değiştir</button>
+            </div>
+            <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+              <h4 class="font-bold text-white text-xs uppercase tracking-wider text-indigo-400">Saklanacak Sayfaları Seçin</h4>
+              <div class="grid grid-cols-4 md:grid-cols-8 gap-3 max-h-60 overflow-y-auto p-2">
+                <template x-for="page in pdfPages" :key="page.num">
+                  <div @click="page.keep = !page.keep" 
+                       :class="page.keep ? 'bg-indigo-600/20 border-indigo-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-600 line-through'"
+                       class="p-3 rounded-xl border text-center cursor-pointer transition-all">
+                    <p class="text-xs font-bold" x-text="'Sayfa ' + page.num"></p>
+                    <p class="text-[9px]" x-text="page.keep ? 'Aktif' : 'Silinecek'"></p>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- 3. PDF ŞİFRELEME -->
+        <template x-if="toolType === 'pdf-encrypt' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+              <span class="text-xs font-bold text-white" x-text="fileList[0].name"></span>
+              <button @click="fileList = []" class="text-xs text-rose-400 font-bold underline">Değiştir</button>
+            </div>
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 space-y-2 text-xs text-amber-300">
+              <div class="font-bold flex items-center gap-1.5 text-amber-400">
+                <span>⚠️</span> <span>Önemli Gizlilik Bilgilendirmesi (Sunucu Taraflı İşlem)</span>
+              </div>
+              <p class="leading-relaxed text-slate-300">
+                Bu şifreleme işlemi sunucu taraflı bir Python motoruyla gerçekleştirilmektedir. 
+                Dosyanız sadece şifrelenme işlemi için anlık olarak sunucumuza yüklenir, işlenip size indirildiği an sistemden kalıcı olarak silinir.
+              </p>
+            </div>
+            <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-3">
+              <label class="text-xs font-bold text-slate-300 block">PDF Açılış Parolası</label>
+              <input type="password" x-model="pdfPassword" placeholder="Şifre belirleyin..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs outline-none">
+            </div>
+          </div>
+        </template>
+
+        <!-- 4. RESİM SIKIŞTIRICI -->
+        <template x-if="toolType === 'compressor' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+              <span class="text-xs font-bold text-white" x-text="fileList[0].name + ' (' + (fileList[0].size/1024).toFixed(1) + ' KB)'"></span>
+              <button @click="fileList = []" class="text-xs text-rose-400 font-bold underline">Değiştir</button>
+            </div>
+            <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-3">
+              <div class="flex justify-between text-xs font-bold">
+                <span class="text-slate-300">Kalite Oranı</span>
+                <span class="text-emerald-400 font-mono" x-text="Math.round(compressionQuality * 100) + '%'"></span>
+              </div>
+              <input type="range" min="0.1" max="0.95" step="0.05" x-model="compressionQuality" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+          </div>
+        </template>
+
+        <!-- 5. FORMAT DÖNÜŞTÜRÜCÜ -->
+        <template x-if="toolType === 'converter' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+              <span class="text-xs font-bold text-white" x-text="fileList[0].name"></span>
+              <button @click="fileList = []" class="text-xs text-rose-400 font-bold underline">Değiştir</button>
+            </div>
+            <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-3">
+              <label class="text-xs font-bold text-slate-300 block">Dönüştürülecek Format</label>
+              <select x-model="targetFormat" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs outline-none">
+                <option value="image/webp">WEBP (.webp)</option>
+                <option value="image/png">PNG (.png)</option>
+                <option value="image/jpeg">JPG (.jpg)</option>
+              </select>
+            </div>
+          </div>
+        </template>
+
+        <!-- 6. VİDEODAN MP3 -->
+        <template x-if="toolType === 'audio-extract' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+              <span class="text-xs font-bold text-white" x-text="fileList[0].name"></span>
+              <button @click="fileList = []" class="text-xs text-rose-400 font-bold underline">Değiştir</button>
+            </div>
+            <p class="text-xs text-slate-400">Video dosyanız taranarak LAME MP3 kodlayıcısı ile saf MP3 dosyasına dönüştürülecek.</p>
+          </div>
+        </template>
+
+        <!-- 7. GÖRSEL + MP3 -> WEBM YAPAN EKRAN (WEBM UYARISI EKLENDİ) -->
+        <template x-if="toolType === 'image-audio-video' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="space-y-2 max-h-60 overflow-y-auto">
+              <template x-for="(file, index) in fileList" :key="index">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                  <span class="text-xs text-white font-bold" x-text="(index === 0 ? '🖼️ Görsel: ' : '🎵 Müzik: ') + file.name"></span>
+                  <button @click="removeFile(index)" class="text-rose-400 text-xs font-bold">✕</button>
+                </div>
+              </template>
+            </div>
+            
+            <template x-if="fileList.length < 2">
+              <label class="bg-slate-800 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer inline-block">
+                ＋ İkinci Dosyayı Ekle (Resim veya MP3)
+                <input type="file" accept=".png, .jpg, .jpeg, .mp3" class="hidden" @change="handleFiles">
+              </label>
+            </template>
+
+            <!-- UYARI KUTUSU -->
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 space-y-2 text-xs text-amber-300">
+              <div class="font-bold flex items-center gap-1.5 text-amber-400">
+                <span>⚠️</span> <span>Önemli Bilgilendirme ve Format Uyarısı (WebM Çıkış)</span>
+              </div>
+              <p class="leading-relaxed text-slate-300">
+                Tarayıcı tabanlı video işleme motorlarının standart gereksinimi nedeniyle bu işlem sonrasında dosya <b>.webm</b> formatında indirilir. 
+                <br><br>
+                <b>Süre ve İşlem Uyarısı:</b> İşlem videonuzun/sesinizin uzunluğuna göre değişiklik gösterir. Örneğin sesiniz 2 dakika ise işlem 2 dakika sürer. Lütfen butona art arda tıklamayın, aksi takdirde işlemler bittiğinde cihazınıza aynı anda bir sürü dosya birden iner. Sabırla bekleyin!
+              </p>
+            </div>
+          </div>
+        </template>
+
+        <!-- 8. VİDEO + MP3 SES DEĞİŞTİRME EKRANI (WEBM UYARISI EKLENDİ) -->
+        <template x-if="toolType === 'video-audio-replace' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="space-y-2 max-h-60 overflow-y-auto">
+              <template x-for="(file, index) in fileList" :key="index">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                  <span class="text-xs text-white font-bold" x-text="(index === 0 ? '🎬 Video: ' : '🎵 Yeni Ses (MP3): ') + file.name"></span>
+                  <button @click="removeFile(index)" class="text-rose-400 text-xs font-bold">✕</button>
+                </div>
+              </template>
+            </div>
+            
+            <template x-if="fileList.length < 2">
+              <label class="bg-slate-800 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer inline-block">
+                ＋ MP3 Ses Dosyasını Ekle
+                <input type="file" accept=".mp3" class="hidden" @change="handleFiles">
+              </label>
+            </template>
+
+            <!-- UYARI KUTUSU -->
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 space-y-2 text-xs text-amber-300">
+              <div class="font-bold flex items-center gap-1.5 text-amber-400">
+                <span>⚠️</span> <span>Önemli Bilgilendirme ve Format Uyarısı (WebM Çıkış)</span>
+              </div>
+              <p class="leading-relaxed text-slate-300">
+                Tarayıcı tabanlı video kayıt altyapısı gereği, bu araçla üretilen yeni video dosyası <b>.webm</b> formatında cihazınıza indirilir. 
+                <br><br>
+                <b>Süre ve Spam Uyarısı:</b> İşlem video süreniz kadar sürer. Butona üst üste tekrar tekrar tıklamayın; aksi takdirde arka planda kuyruğa binen işlemler tamamlandığında bilgisayarınıza aynı anda birçok dosya birden inebilir. Tek tıkla bekleyin!
+              </p>
+            </div>
+          </div>
+        </template>
+
+        <!-- 9. ZIP -->
+        <template x-if="toolType === 'zip-tool' && fileList.length > 0">
+          <div class="space-y-6">
+            <div class="space-y-2 max-h-60 overflow-y-auto">
+              <template x-for="(file, index) in fileList" :key="index">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                  <span class="text-xs text-white font-bold" x-text="file.name"></span>
+                  <button @click="removeFile(index)" class="text-rose-400 text-xs">✕</button>
+                </div>
+              </template>
+            </div>
+            <label class="bg-slate-800 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer inline-block">
+              ＋ Dosya Ekle
+              <input type="file" multiple class="hidden" @change="handleFiles">
+            </label>
+          </div>
+        </template>
+
+        <!-- İŞLEM BUTONU -->
+        <template x-if="fileList.length > 0">
+          <button @click="executeTool()" 
+                  :disabled="isProcessing" 
+                  :class="!isProcessing ? 'bg-indigo-600 hover:bg-indigo-500 cursor-pointer' : 'bg-slate-800 text-slate-600 cursor-not-allowed'" 
+                  class="w-full py-4 rounded-2xl text-sm font-bold shadow-xl transition-all flex items-center justify-center gap-2 text-white">
+            <span x-text="isProcessing ? '⏳ İşleniyor...' : '🚀 İşlemi Gerçekleştir ve İndir'"></span>
+          </button>
+        </template>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ÖZELLEŞTİRME PANELİ -->
+  <div x-show="settingsOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div @click.away="settingsOpen = false" class="w-full max-w-md rounded-3xl p-6 bg-slate-900 border border-slate-800 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-white text-base">🎨 Siteyi Özelleştir</h3>
+        <button @click="settingsOpen = false" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-400 block mb-1">Uygulama Adı</label>
+          <input type="text" x-model="settings.appName" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Alt Başlık</label>
+          <input type="text" x-model="settings.appSubtitle" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-slate-400 block mb-1">Arka Plan Rengi</label>
+            <input type="color" x-model="settings.bgMain" class="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer">
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Kart Rengi</label>
+            <input type="color" x-model="settings.bgCard" class="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-slate-400 block mb-1">Vurgu Renk 1</label>
+            <input type="color" x-model="settings.accentFrom" class="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer">
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Vurgu Renk 2</label>
+            <input type="color" x-model="settings.accentTo" class="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer">
+          </div>
+        </div>
+      </div>
+      <button @click="saveSettings" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-bold transition-all">Kaydet & Uygula</button>
+    </div>
+  </div>
+
+  <footer class="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
+    <p x-text="settings.appName + ' — Tüm hakları saklıdır.'"></p>
+  </footer>
+
+  <!-- GSAP ANİMASYONLARI -->
+  <script>
+    function initAnimations() {
+      gsap.fromTo('.hero-badge', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' });
+      gsap.fromTo('.hero-title', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.2, ease: 'power3.out' });
+      gsap.fromTo('.hero-desc', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.4, ease: 'power3.out' });
+      gsap.fromTo('.hero-buttons', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.6, ease: 'power3.out' });
+      gsap.fromTo('.feature-cards', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.8, ease: 'power3.out' });
+    }
+  </script>
+
+  <script src="backend.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
